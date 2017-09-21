@@ -1,0 +1,58 @@
+<launch>
+	<group ns="/alice">
+		<node name="rosaria_client" pkg="rosaria" type="ModRosAria" output="screen">
+			<param name="port" value="/dev/ttyS0" />
+			<param name="publish_aria_lasers" value="false" />
+			<remap from="rosaria_client/battery_recharge_state" to="battery_recharge_state"/>
+			<remap from="rosaria_client/battery_state_of_charge" to="battery_state_of_charge"/>
+			<remap from="rosaria_client/battery_voltage" to="battery_voltage"/>
+			<remap from="rosaria_client/bumper_state" to="bumper_state"/>
+			<remap from="rosaria_client/diagnostics" to="diagnostics"/>
+			<remap from="rosaria_client/sonar" to="sonar"/>
+			<remap from="rosaria_client/pose" to="odom"/>
+			<remap from="rosaria_client/motors_state" to="motors_state"/>
+			<remap from="rosaria_client/sonar_pointcloud2" to="sonar_pointcloud2"/>
+			<remap from="rosaria_client/cmd_vel" to="cmd_vel"/>
+			<remap from="rosaria_client/gripper_command" to="gripper_command"/>
+			<remap from="rosaria_client/parameter_descriptions" to="parameter_descriptions"/>
+			<remap from="rosaria_client/parameter_updates" to="parameter_updates"/>
+		</node>
+		<node name="SICK_node" pkg="sicktoolbox_wrapper" type="sicklms" output="screen">
+			<param name="port" value="/dev/ttyS2"/>
+			<param name="connect_delay" value="30"/>
+		</node>
+		<node name="laser_joint_state_publisher" pkg="tf" type="static_transform_publisher" args="0 0 0.2 0 0 0 base_link laser 100" />
+
+	
+                <node   name="master_discovery"	pkg="master_discovery_fkie"	type="master_discovery">
+		    <param name="mcast_group"		value="224.0.0.251"/>
+	        </node>
+	        <node   name="master_sync"		pkg="master_sync_fkie"		type="master_sync"/>
+	        <node   name="teleop_twist"         pkg="teleop_twist_keyboard"       type="teleop_twist_keyboard.py" />
+		<node name="map_server" pkg="map_server" type="map_server" args="$(find alice_base)/maps/map24.yaml"/>
+		<node name="localizator" pkg="amcl" type="amcl" />
+		<node   name="move_base"			pkg="move_base"	    type="move_base">
+		    <param name="base_global_planner"	type="string" value="global_planner/GlobalPlanner" />
+		    <param name="base_local_planner"	type="string" value="dwa_local_planner/DWAPlannerROS" />
+		    <param name="controller_frequency"	type="double" value="6.0" />
+		    <rosparam file="$(find alice_base)/params/base_global_planner.yaml"
+			      command="load" ns="GlobalPlanner"/>
+		    <rosparam file="$(find alice_base)/params/costmap_common_params.yaml"
+			      command="load" ns="local_costmap"/>
+		    <rosparam file="$(find alice_base)/params/costmap_common_params.yaml"
+			      command="load" ns="global_costmap"/>
+		    <rosparam file="$(find alice_base)/params/local_costmap_params.yaml"
+			      command="load"/>
+		    <param name="local_costmap/global_frame"		value="odom" />
+		    <param name="local_costmap/robot_base_frame"	value="base_link" />
+		    <rosparam file="$(find alice_base)/params/global_costmap_params.yaml"
+			      command="load" />
+		    <param name="global_costmap/global_frame"		value="map" />
+		    <param name="global_costmap/robot_base_frame"	value="base_link" />
+		    <rosparam file="$(find alice_base)/params/base_local_planner_params.yaml"
+			      command="load" />
+	       </node>
+	</group> 
+</launch>
+		
+

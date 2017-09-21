@@ -1,0 +1,12 @@
+local_costmap:
+    global_frame: alice/odom
+    robot_base_frame: alice/base_link
+    update_frequency: 5.0
+    publish_frequency: 2.0
+    static_map: false
+    rolling_window: true
+    width: 8.0
+    height: 8.0
+    resolution: 0.025
+    inflation_radius: 0.2
+    cost_scaling_factor: 0
